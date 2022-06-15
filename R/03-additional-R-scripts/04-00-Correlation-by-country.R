@@ -8,7 +8,7 @@ library(patchwork)
 # This data was cleaned in files contained in R/03-additional--R-scripts/ 00-03
 GamingStudyData_clean <- read_csv('data/GamingStudyData_clean.csv')
 
-sort(unique(GamingStudyData_clean$Residence))
+
 # United States  (USA)
 GamingData_clean_US <- GamingStudyData_clean %>% filter(Residence == "USA")
 
@@ -24,8 +24,7 @@ GamingData_clean_UK <- GamingStudyData_clean %>% filter(Residence == "UK")
 
 
 # 01) Correlation between Gaming Hours and Anxiety (GAD-7) ----------------
-colnames(GamingData_clean_US)
-GamingData_clean_US$GAD_T
+
 US_hours_GAD_cor <- with(GamingData_clean_US,
                          cor.test(GAD_T, Hours)) %>% tidy()
 
@@ -112,3 +111,27 @@ ggsave(plot = All_scatter_plots,
        units= "in")
 
 saveRDS(All_scatter_plots, "assets/All_scatter_plots.RDS")
+
+
+Gad_7_Avg_hours <- GamingStudyData_clean %>% 
+  filter(Residence %in% c("USA", "UK", "Germany")) %>% 
+  ggplot(aes(x = GAD_T, y = Hours, group = Residence))+
+  geom_jitter(aes(colour = Residence),  shape = 21, alpha = .4)+
+  geom_smooth(method = "lm", se = F, colour = 'grey10')+
+  xlab("GAD-7 Total Score")+
+  ylab("Avg. Weekly Hours Gaming")+
+  facet_wrap(~Residence, ncol = 1)+
+  scale_colour_manual(values = c("orange", "tomato", "steelblue"))+
+  scale_x_continuous(limits = c(0, 22))+
+  scale_y_continuous(limits = c(0, 150))+
+  theme_minimal()+
+  theme(legend.position = "none")
+
+ggsave(plot = Gad_7_Avg_hours,
+       filename = "output/figs/Gad_7_Avg_hours.png", 
+       dpi = 300, 
+       height = 5.92, 
+       width = 7.78,
+       units= "in")
+
+saveRDS(Gad_7_Avg_hours, "assets/Gad_7_Avg_hours.RDS")
