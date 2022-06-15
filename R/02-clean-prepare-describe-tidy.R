@@ -34,7 +34,7 @@ GamingStudyData_clean <- GamingStudyData_clean %>%
 
 
 # 04) Store Data set ------------------------------------------------------
-write_csv(GamingStudyData_clean, 'data/GamingStudyData_clean-base-R.csv')
+write_csv(GamingStudyData_clean, 'data/GamingStudyData_clean-tidy-R.csv')
 
 
 # 05) Histogram and summary of Hours  -------------------------------------
@@ -61,9 +61,15 @@ Hours_histogram <- GamingStudyData_clean %>%
                    # Thematic settings
                    theme_minimal()
 
+ggsave(plot = Hours_histogram,
+       filename = "output/figs/Hours_histogram_ggplot2.png", 
+       dpi = 300, 
+       height = 5.92, 
+       width = 7.78,
+       units= "in")
 
-# summary
-GamingStudyData_clean %>% 
+# summary stats for Hours played
+Gstudy_summary <- GamingStudyData_clean %>% 
   summarise(N    = nrow(.),
             Mean = mean(Hours),
             SD   = sd(Hours),
@@ -71,4 +77,5 @@ GamingStudyData_clean %>%
             Min  = min(Hours),
             Max  = max(Hours))
 
+write_csv(Gstudy_summary, 'output/tables/Gstudy_summary_tidy.csv')
 

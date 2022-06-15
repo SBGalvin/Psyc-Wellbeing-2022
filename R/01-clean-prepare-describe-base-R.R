@@ -24,7 +24,7 @@ GamingStudyData <- read.csv('data/GamingStudy_data.csv')
 # GD_4 keep only league of legends players
 # GD_5 keep non-professional players
 
-GD_1 <- GamingStudyData[is.na(GamingStudyData$Hours), ]  
+GD_1 <- GamingStudyData[!is.na(GamingStudyData$Hours), ]  
 GD_2 <- GD_1[GD_1$Hours > 0 & GD_1$Hours < 168, ]
 GD_3 <- GD_2[!is.na(GD_2$SPIN_T), ]
 GD_4 <- GD_3[GD_3$Game     == "League of Legends", ]
@@ -40,6 +40,14 @@ write.csv(GamingStudyData_clean, 'data/GamingStudyData_clean-base-R.csv')
 
 
 # 05) Histogram and summary of Hours  -------------------------------------
+# To save the plot as a png file highlight from line 45-59 and press `ctrl + enter`
+
+png(filename = "output/figs/Hours_histogram_base_device.png", 
+    res = 300,
+    type = "cairo",   # higher definition base R plots
+    height = 5.92, 
+    width = 7.78, 
+    units = "in")
 
 hist(GamingStudyData_clean$Hours,
      main   = "Histogram of Hours Played (Weekly)",
@@ -48,6 +56,14 @@ hist(GamingStudyData_clean$Hours,
      border = 'white',
      breaks = seq(0, 120, by = 5))
 
-# summary
+dev.off()
+
+
+# summary stats of hours
+# You will need to install the psych package to run this chunk of code:
+# install.packages("psych") ## only run if not previously installed
+library(psych) # loads psych into the current environment
+
 Hours_summary <- as.data.frame(psych::describe(GamingStudyData_clean$Hours) )
-Hours_summary[, c("n", "mean", "median", "sd", "se", "min", "max")]
+write.csv(Hours_summary[, c("n", "mean", "median", "sd", "se", "min", "max")],
+          file = "output/tables/Gstudy_summary_base_psych.csv")
