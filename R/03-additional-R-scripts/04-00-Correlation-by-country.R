@@ -113,6 +113,9 @@ ggsave(plot = All_scatter_plots,
 saveRDS(All_scatter_plots, "assets/All_scatter_plots.RDS")
 
 
+# 03) Scatterplot faceted by Residence ------------------------------------
+
+
 Gad_7_Avg_hours <- GamingStudyData_clean %>% 
   filter(Residence %in% c("USA", "UK", "Germany")) %>% 
   ggplot(aes(x = GAD_T, y = Hours, group = Residence))+
@@ -123,7 +126,7 @@ Gad_7_Avg_hours <- GamingStudyData_clean %>%
   facet_wrap(~Residence, ncol = 1)+
   scale_colour_manual(values = c("orange", "tomato", "steelblue"))+
   scale_x_continuous(limits = c(0, 22))+
-  scale_y_continuous(limits = c(0, 150))+
+  scale_y_continuous(limits = c(0, 100))+
   theme_minimal()+
   theme(legend.position = "none")
 
@@ -135,3 +138,35 @@ ggsave(plot = Gad_7_Avg_hours,
        units= "in")
 
 saveRDS(Gad_7_Avg_hours, "assets/Gad_7_Avg_hours.RDS")
+
+
+
+# 04) Correlation of Anxiety Measures -------------------------------------
+# correlation of Anxiety measures in the data set
+
+GamingX <- GamingStudyData_clean %>% 
+  filter(Residence %in% c("USA", "UK", "Germany")) %>% 
+  
+  group_by(Residence) %>% 
+  summarise(GAD7_SPIN  = cor(x = GAD_T, y = SPIN_T),
+            GAD7_SPINp = cor.test(x = GAD_T, y = SPIN_T)$p.value,
+            GAD7_SWL   = cor(x = GAD_T, y = SWL_T),
+            GAD7_SWLp  = cor.test(x = GAD_T, y = SWL_T)$p.value,
+            SPIN_SWL   = cor(x = SPIN_T, y = SWL_T),
+            SPIN_SWLp  = cor.test(x = SPIN_T, y = SWL_T)$p.value)
+
+
+AnxMeasure_correlations <- left_join(x = GamingX %>% 
+                                       select(Residence, all_of(c("GAD7_SPIN", "GAD7_SWL", "SPIN_SWL"))) %>% 
+                                       pivot_longer(cols = c("GAD7_SPIN", "GAD7_SWL", "SPIN_SWL"), names_to = "Measures", values_to = "r") %>% 
+                                       separate(Measures, into = c("Measure1", "Measure2"), sep = "_"),
+                                     
+                                     y = GamingX %>% 
+                                       select(Residence, ends_with("p")) %>% 
+                                       pivot_longer(cols = c("GAD7_SPINp", "GAD7_SWLp", "SPIN_SWLp"), names_to = "Measures", values_to = "p") %>% 
+                                       mutate(Measures = str_remove(Measures, "p")) %>% 
+                                       separate(Measures, into = c("Measure1", "Measure2"), sep = "_"),
+                                     
+                                     by = c("Residence", "Measure1", "Measure2"))
+
+write_csv(AnxMeasure_correlations, 'output/tables/AnxMeasure_correlations.csv')
